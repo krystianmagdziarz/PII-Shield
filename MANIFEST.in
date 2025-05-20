@@ -1,0 +1,5 @@
+include LICENSE
+include README.md
+recursive-include pii_shield/templates *
+recursive-include pii_shield/static *
+recursive-include pii_shield/locale * 

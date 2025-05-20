@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "pii_shield",
 ]
 
 MIDDLEWARE = [
@@ -47,6 +48,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "pii_shield.middleware.PIIShieldMiddleware",
 ]
 
 ROOT_URLCONF = "frontendapp.urls"
@@ -120,3 +122,60 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# PII Shield configuration
+PII_SHIELD = {
+    "MODE": "frontend",
+    # Redis connection settings
+    "REDIS": {
+        "host": "localhost",
+        "port": 6379,
+        "password": "pii_redis_pass",
+        "ssl": False,
+        "db": 0,
+        "socket_timeout": 5,
+        "socket_connect_timeout": 5,
+        "retry_on_timeout": True,
+        "health_check_interval": 30,
+    },
+    # Data expiration settings
+    "SESSION": {
+        "timeout": 1800,  # 30 minutes
+        "refresh_threshold": 300,  # 5 minutes
+        "cleanup_interval": 900,  # 15 minutes
+    },
+    # Redis channels
+    "CHANNELS": {
+        "prefix": "pii_shield",
+        "default": "default",
+    },
+    # Synchronization settings
+    "SYNC": {
+        "batch_size": 100,
+        "max_retries": 3,
+        "retry_delay": 1,  # seconds
+        "backoff_factor": 2,
+        "request_timeout": 5,  # seconds
+    },
+    # Logging configuration
+    "LOGGING": {
+        "enabled": True,
+        "level": "INFO",
+        "file": None,  # None means use Django's logging
+    },
+    # Security settings
+    "SECURITY": {
+        "token_header": "Authorization",
+        "token_prefix": "Token",
+        "rate_limit": {
+            "enabled": True,
+            "rate": "60/minute",
+        },
+    },
+    # Advanced options
+    "ADVANCED": {
+        "waiting_view": "pii_shield:waiting_for_sync",
+        "redirect_session_key": "redirect_after_sync",
+        "auto_reconnect": True,
+    },
+}
